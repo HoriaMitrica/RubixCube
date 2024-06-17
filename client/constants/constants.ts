@@ -38,3 +38,17 @@ export const INITIAL_POSITIONS: Cubie[] = [
     { name: 'Red_Green', rotation: new THREE.Quaternion(0, 0, 0) },
     { name: 'Red_Yellow_Green', rotation: new THREE.Quaternion(0, 0, 0) },
 ];
+
+
+export const TOP_LAYER_INDEXES=[0,1,2,3,4,5,6,7,8];
+export const MIDDLE_LAYER_INDEXES=[9,10,11,12,13,14,15,16];
+export const BOTTOM_LAYER_INDEXES=[17,18,19,20,21,22,23,24,25];
+
+export const Y_CLOCKWISE_ROTATION=new THREE.Vector3(0, -1, 0);
+export const Y_COUNTERCLOCKWISE_ROTATION=new THREE.Vector3(0, 1, 0);
+export const X_CLOCKWISE_ROTATION=new THREE.Vector3(0, -1, 0);
+export const X_COUNTERCLOCKWISE_ROTATION=new THREE.Vector3(0, 1, 0);
+export const Z_CLOCKWISE_ROTATION=new THREE.Vector3(0, -1, 0);
+export const Z_COUNTERCLOCKWISE_ROTATION=new THREE.Vector3(0, 1, 0);
+
+export const ROTATION_ANGLE=Math.PI/2; //90 deg

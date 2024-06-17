@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import React, { useRef, useState } from 'react'
 import { Html, useGLTF } from '@react-three/drei'
-import { INITIAL_POSITIONS } from '@/constants/constants'
+import { BOTTOM_LAYER_INDEXES, INITIAL_POSITIONS, MIDDLE_LAYER_INDEXES, ROTATION_ANGLE, TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, Y_COUNTERCLOCKWISE_ROTATION } from '@/constants/constants'
 import { Cubie } from '@/models/cubie'
 import './style.scss'
 
@@ -22,50 +22,36 @@ export const RubiksCube3x3 = (props: JSX.IntrinsicElements['group']) => {
     setCubies(newCubies);
   };
 
-  const rotateTopLayer = () => {
-    const topLayerIndices = [0,1,2,3,4,5,6,7,8];
-    rotateGroup(topLayerIndices, new THREE.Vector3(0,1,0), Math.PI / 2);
-  };
-
-  const rotateMiddleLayer = () => {
-    const middleLayer = [9,10,11,12,13,14,15,16];
-    rotateGroup(middleLayer,new THREE.Vector3(0,1,0), Math.PI / 2);
-  };
-  const rotateBottomLayer = () => {
-    const bottomLayer = [17,18,19,20,21,22,23,24,25];
-    rotateGroup(bottomLayer,new THREE.Vector3(0,1,0), Math.PI / 2);
-  };
-  
-
   return (
     <>
-    <group {...props} dispose={null}>
+      <group {...props} dispose={null}>
 
 
-      {cubies?.map((cubie, index) => (
-        <group key={index} rotation={new THREE.Euler().setFromQuaternion(cubie.rotation)}>
-          {nodes[`${cubie.name}`] &&
-            <mesh geometry={(nodes[`${cubie.name}_1`] as THREE.Mesh).geometry} material={materials.Black} />
-          }
-          {
-            nodes[`${cubie.name}`] &&
-            cubie.name.split('_').map((color: string, color_index: number) => (<mesh key={color_index} geometry={(nodes[`${cubie.name}_${color_index + 2}`] as THREE.Mesh).geometry} material={materials[color]} />))
-          }
-        </group>
-      ))}
+        {cubies?.map((cubie, index) => (
+          <group key={index} rotation={new THREE.Euler().setFromQuaternion(cubie.rotation)}>
+            {nodes[`${cubie.name}`] &&
+              <mesh geometry={(nodes[`${cubie.name}_1`] as THREE.Mesh).geometry} material={materials.Black} />
+            }
+            {
+              nodes[`${cubie.name}`] &&
+              cubie.name.split('_').map((color: string, color_index: number) => (<mesh key={color_index} geometry={(nodes[`${cubie.name}_${color_index + 2}`] as THREE.Mesh).geometry} material={materials[color]} />))
+            }
+          </group>
+        ))}
 
-    </group>
-    <Html>
-
-    <div className="container">
-      <div className="canvas-container"/>
-      <div className="buttons-container">
-        <button className="button" onClick={rotateTopLayer}>U</button>
-        <button className="button" onClick={rotateMiddleLayer}>E</button>
-        <button className="button" onClick={rotateBottomLayer}>D</button>
-      </div>
-    </div>
-    </Html>
+      </group>
+        <Html>
+          <div className="container">
+            <div className="canvas-container" />
+            <div className="buttons-container">
+              <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>U</button>
+              <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>U'</button>
+              
+              <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>D</button>
+              <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>D'</button>
+            </div>
+          </div>
+        </Html>
     </>
   )
 }
