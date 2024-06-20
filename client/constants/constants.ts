@@ -58,3 +58,4 @@ export const Y_COUNTERCLOCKWISE_ROTATION = new THREE.Vector3(0, 1, 0);
 export const Z_COUNTERCLOCKWISE_ROTATION = new THREE.Vector3(0, 0, 1);
 
 export const ROTATION_ANGLE = Math.PI / 2; //90 deg
+export const ROTATION_DURATION:number=500;

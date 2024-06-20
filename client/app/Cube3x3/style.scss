@@ -86,4 +86,7 @@
     box-shadow: 0 2px #357a38;
     transform: translateY(2px);
   }
+  &:disabled{
+    background-color: #357a38;
+  }
 }
