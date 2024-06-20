@@ -1,0 +1,89 @@
+.grid-container {
+  display: grid;
+
+  grid-template-areas:
+    ". up-clockwise up-counterclockwise ."
+    "left-counterclockwise front-counterclockwise front-clockwise right-clockwise"
+    "left-clockwise back-clockwise back-counterclockwise right-counterclockwise"
+    ". down-counterclockwise down-clockwise .";
+
+  justify-content: center;
+  align-items: center;
+  position:absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+#up-clockwise {
+  grid-area: up-clockwise;
+}
+
+#up-counterclockwise {
+  grid-area: up-counterclockwise;
+}
+
+#left-counterclockwise {
+  grid-area: left-counterclockwise;
+}
+
+#front-counterclockwise {
+  grid-area: front-counterclockwise;
+}
+
+#front-clockwise {
+  grid-area: front-clockwise;
+}
+
+#right-clockwise {
+  grid-area: right-clockwise;
+}
+
+#left-clockwise {
+  grid-area: left-clockwise;
+}
+
+#back-clockwise {
+  grid-area: back-clockwise;
+}
+
+#back-counterclockwise {
+  grid-area: back-counterclockwise;
+}
+
+#right-counterclockwise {
+  grid-area: right-counterclockwise;
+}
+
+#down-counterclockwise {
+  grid-area: down-counterclockwise;
+}
+
+#down-clockwise {
+  grid-area: down-clockwise;
+}
+
+.button {
+  padding: 5px 10px;
+  margin: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px #357a38;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #45a049;
+  }
+
+  &:active {
+    background-color: #357a38;
+    box-shadow: 0 2px #357a38;
+    transform: translateY(2px);
+  }
+}
