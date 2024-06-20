@@ -1,7 +1,7 @@
 import { Cubie } from "@/models/cubie";
 import * as THREE from 'three';
 
-export const rotateGroup = (initialCubies:Cubie[],groupIndices: number[], axis: THREE.Vector3, angle: number):Cubie[] => {
+export const rotateGroup = (initialCubies:Cubie[],groupIndices: number[], axis: THREE.Vector3, angle: number,duration:number, onUpdate: (cubies: Cubie[]) => void) => {
 
     const localCubies = initialCubies.map(cubie => ({
       ...cubie,
@@ -33,5 +33,5 @@ export const rotateGroup = (initialCubies:Cubie[],groupIndices: number[], axis: 
         cubie.currentIndex = groupIndices[newIndex];
       }
     });
-    return localCubies;
+    onUpdate(localCubies) ;
   };
