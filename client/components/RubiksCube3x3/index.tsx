@@ -52,17 +52,17 @@ export const RubiksCube3x3 = (props: JSX.IntrinsicElements['group']) => {
           <div className="canvas-container" />
           <div className="buttons-container">
             <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>U</button>
-            <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>U'</button>
+            <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>U&apos;</button>
 
             <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>D</button>
-            <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>D'</button>
+            <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>D&apos;</button>
 
 
             <button className="button" onClick={() => rotateGroup(FRONT_LAYER_INDEXES, Z_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>F</button>
-            <button className="button" onClick={() => rotateGroup(FRONT_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>F'</button>
+            <button className="button" onClick={() => rotateGroup(FRONT_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>F&apos;</button>
 
             <button className="button" onClick={() => rotateGroup(BACK_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>B</button>
-            <button className="button" onClick={() => rotateGroup(BACK_LAYER_INDEXES, Z_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>B'</button>
+            <button className="button" onClick={() => rotateGroup(BACK_LAYER_INDEXES, Z_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>B&apos;</button>
           </div>
         </div>
       </Html>
