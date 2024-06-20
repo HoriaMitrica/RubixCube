@@ -3,7 +3,7 @@
 import React from 'react'
 import { RubiksCube3x3 } from "@/components/RubiksCube3x3/index"
 import { Canvas } from 'react-three-fiber'
-import { Html, OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 const User = () => {
     return (
         <>
