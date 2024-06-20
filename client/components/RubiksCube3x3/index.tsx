@@ -1,24 +1,31 @@
 
 import * as THREE from 'three'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { Html, useGLTF } from '@react-three/drei'
-import { BOTTOM_LAYER_INDEXES, INITIAL_POSITIONS, MIDDLE_LAYER_INDEXES, ROTATION_ANGLE, TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, Y_COUNTERCLOCKWISE_ROTATION } from '@/constants/constants'
+import { BACK_LAYER_INDEXES, BOTTOM_LAYER_INDEXES, FRONT_LAYER_INDEXES, INITIAL_POSITIONS, ROTATION_ANGLE, TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, Y_COUNTERCLOCKWISE_ROTATION, Z_CLOCKWISE_ROTATION, Z_COUNTERCLOCKWISE_ROTATION } from '@/constants/constants'
 import { Cubie } from '@/models/cubie'
 import './style.scss'
 
 export const RubiksCube3x3 = (props: JSX.IntrinsicElements['group']) => {
   const { nodes, materials } = useGLTF('/models/RubiksCube3x3.glb');
-  const [cubies, setCubies] = React.useState<Cubie[]>(INITIAL_POSITIONS);
+  const [cubies, setCubies] = useState<Cubie[]>(INITIAL_POSITIONS);
 
   const rotateGroup = (groupIndices: number[], axis: THREE.Vector3, angle: number) => {
+
     const newCubies = [...cubies];
-    groupIndices.forEach(index => {
-      const cubie = newCubies[index];
-      const quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-      const currentQuaternion = new THREE.Quaternion().copy(cubie.rotation);
-      currentQuaternion.multiplyQuaternions(quaternion, currentQuaternion);
-      cubie.rotation.copy(currentQuaternion);
-    });
+    
+    for (let index = 0; index < groupIndices.length-1; index++) {
+      const cubie: Cubie | undefined = newCubies.find((cube: Cubie) => cube.currentIndex === groupIndices[index]);
+      if (cubie) {
+        const quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+        const currentQuaternion = new THREE.Quaternion().copy(cubie.rotation);
+        currentQuaternion.multiplyQuaternions(quaternion, currentQuaternion);
+        cubie.rotation.copy(currentQuaternion);
+
+
+      }
+    }
+    console.log(newCubies);
     setCubies(newCubies);
   };
 
@@ -26,7 +33,7 @@ export const RubiksCube3x3 = (props: JSX.IntrinsicElements['group']) => {
     <>
       <group {...props} dispose={null}>
 
-
+        <mesh geometry={(nodes.Center as THREE.Mesh).geometry} material={materials.Black} />
         {cubies?.map((cubie, index) => (
           <group key={index} rotation={new THREE.Euler().setFromQuaternion(cubie.rotation)}>
             {nodes[`${cubie.name}`] &&
@@ -40,18 +47,25 @@ export const RubiksCube3x3 = (props: JSX.IntrinsicElements['group']) => {
         ))}
 
       </group>
-        <Html>
-          <div className="container">
-            <div className="canvas-container" />
-            <div className="buttons-container">
-              <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>U</button>
-              <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>U'</button>
-              
-              <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>D</button>
-              <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>D'</button>
-            </div>
+      <Html>
+        <div className="container">
+          <div className="canvas-container" />
+          <div className="buttons-container">
+            <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>U</button>
+            <button className="button" onClick={() => rotateGroup(TOP_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>U'</button>
+
+            <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>D</button>
+            <button className="button" onClick={() => rotateGroup(BOTTOM_LAYER_INDEXES, Y_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>D'</button>
+
+
+            <button className="button" onClick={() => rotateGroup(FRONT_LAYER_INDEXES, Z_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>F</button>
+            <button className="button" onClick={() => rotateGroup(FRONT_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>F'</button>
+
+            <button className="button" onClick={() => rotateGroup(BACK_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>B</button>
+            <button className="button" onClick={() => rotateGroup(BACK_LAYER_INDEXES, Z_CLOCKWISE_ROTATION, ROTATION_ANGLE)}>B'</button>
           </div>
-        </Html>
+        </div>
+      </Html>
     </>
   )
 }
