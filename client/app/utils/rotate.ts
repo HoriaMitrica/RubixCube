@@ -11,7 +11,10 @@ export const rotateGroup = (
   setCubies: (cubies: Cubie[]) => void,
   setIsAnimating?: (isAnimating: boolean) => void
 ) => {
-  console.log(axis,cubies);
+  console.log(axis, cubies);
+  
+  const centerCubiesInGroup = groupIndices.filter(index => CENTER_INDEXES.includes(index));
+  const isSliceMove = centerCubiesInGroup.length > 1;
   
   const currentCubies = cubies.map(cubie => ({
     ...cubie,
@@ -20,8 +23,6 @@ export const rotateGroup = (
   
   const cubiesToRotate: Cubie[] = [];
   const initialRotations: THREE.Quaternion[] = [];
-  
-
   
   groupIndices.forEach(index => {
     const cubie = currentCubies.find(c => c.currentIndex === index);
@@ -36,26 +37,32 @@ export const rotateGroup = (
   }
   
   cubiesToRotate.forEach((cubie, index) => {
-    if (CENTER_INDEXES.includes(cubie.currentIndex)) {
+    if (!isSliceMove && CENTER_INDEXES.includes(cubie.currentIndex)) {
       return;
     }
     
     if (axis.x < 0 || axis.y < 0 || axis.z < 0) {
-      const nonCenterIndices = groupIndices.filter(idx => !CENTER_INDEXES.includes(idx));
-      const currentPosition = nonCenterIndices.indexOf(cubie.currentIndex);
+      const nonCentralIndices = isSliceMove 
+        ? groupIndices.filter(idx => idx !== 13) // Only filter out central cubie for slice moves
+        : groupIndices.filter(idx => !CENTER_INDEXES.includes(idx)); // Filter all centers for regular moves
+        
+      const currentPosition = nonCentralIndices.indexOf(cubie.currentIndex);
       if (currentPosition !== -1) {
-        const newPosition = (currentPosition + 2) % nonCenterIndices.length;
-        cubie.currentIndex = nonCenterIndices[newPosition];
+        const newPosition = (currentPosition + 2) % nonCentralIndices.length;
+        cubie.currentIndex = nonCentralIndices[newPosition];
       }
     } else if (axis.x > 0 || axis.y > 0 || axis.z > 0) {
-      const nonCenterIndices = groupIndices.filter(idx => !CENTER_INDEXES.includes(idx));
-      const currentPosition = nonCenterIndices.indexOf(cubie.currentIndex);
+      const nonCentralIndices = isSliceMove 
+        ? groupIndices.filter(idx => idx !== 13) // Only filter out central cubie for slice moves
+        : groupIndices.filter(idx => !CENTER_INDEXES.includes(idx)); // Filter all centers for regular moves
+        
+      const currentPosition = nonCentralIndices.indexOf(cubie.currentIndex);
       if (currentPosition !== -1) {
         let newPosition = currentPosition - 2;
         if (newPosition < 0) {
-          newPosition = nonCenterIndices.length + newPosition;
+          newPosition = nonCentralIndices.length + newPosition;
         }
-        cubie.currentIndex = nonCenterIndices[newPosition];
+        cubie.currentIndex = nonCentralIndices[newPosition];
       }
     }
   });
@@ -120,15 +127,15 @@ export const rotateGroup = (
       });
       
       setCubies([...finalCubies]);
-  console.log(finalCubies)
+      console.log(finalCubies);
       
       if (setIsAnimating) {
         setIsAnimating(false);
       }
     }
   };
+  
   setTimeout(() => {
-
     requestAnimationFrame(animate);
   }, 50);
 };

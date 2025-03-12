@@ -41,15 +41,18 @@ export const INITIAL_POSITIONS: Cubie[] = [
 ];
 
 export const TOP_LAYER_INDEXES = [0, 1, 2, 5, 8, 7, 6, 3, 4];
+export const EQUATOR_LAYER_INDEXES = [9, 10, 11, 14, 17, 16, 15, 12];
 export const BOTTOM_LAYER_INDEXES = [21, 18, 19, 20, 23, 26, 25, 24, 22];
 
 export const FRONT_LAYER_INDEXES = [6, 7, 8, 17, 26, 25, 24, 15, 16];
+export const SLICE_LAYER_INDEXES = [4, 5, 14, 23, 22, 21, 12, 3];
 export const BACK_LAYER_INDEXES = [11, 20, 19, 18, 9, 0, 1, 2, 10];
 
 export const RIGHT_LAYER_INDEXES = [8, 5, 2, 11, 20, 23, 26, 17, 14];
+export const MIDDLE_LAYER_INDEXES = [16, 7, 4, 1, 10, 19, 22, 25];
 export const LEFT_LAYER_INDEXES = [6, 3, 0, 9, 18, 21, 24, 15, 12];
 
-export const CENTER_INDEXES = [4, 22, 16, 10, 14, 12, 13];
+export const CENTER_INDEXES = [4, 10, 12, 14, 16, 22];
 
 export const X_CLOCKWISE_ROTATION = new THREE.Vector3(-1, 0, 0);
 export const Y_CLOCKWISE_ROTATION = new THREE.Vector3(0, -1, 0);
