@@ -46,8 +46,10 @@ export const BOTTOM_LAYER_INDEXES = [21, 18, 19, 20, 23, 26, 25, 24, 22];
 export const FRONT_LAYER_INDEXES = [6, 7, 8, 17, 26, 25, 24, 15, 16];
 export const BACK_LAYER_INDEXES = [11, 20, 19, 18, 9, 0, 1, 2, 10];
 
-export const RIGHT_LAYER_INDEXES = [8,5,2,11,20,23,26,17,14];
-export const LEFT_LAYER_INDEXES = [6,3,0,9,18,21,24,15,12];
+export const RIGHT_LAYER_INDEXES = [8, 5, 2, 11, 20, 23, 26, 17, 14];
+export const LEFT_LAYER_INDEXES = [6, 3, 0, 9, 18, 21, 24, 15, 12];
+
+export const CENTER_INDEXES = [4, 22, 16, 10, 14, 12, 13];
 
 export const X_CLOCKWISE_ROTATION = new THREE.Vector3(-1, 0, 0);
 export const Y_CLOCKWISE_ROTATION = new THREE.Vector3(0, -1, 0);
@@ -58,4 +60,8 @@ export const Y_COUNTERCLOCKWISE_ROTATION = new THREE.Vector3(0, 1, 0);
 export const Z_COUNTERCLOCKWISE_ROTATION = new THREE.Vector3(0, 0, 1);
 
 export const ROTATION_ANGLE = Math.PI / 2; //90 deg
-export const ROTATION_DURATION:number=500;
+export const ROTATION_DURATION: number = 500;
+
+
+export const SCRAMBLE_ROTATION_DURATION: number = 200;
+export const SCRAMBLE_MOVES_COUNT: number = 15;
