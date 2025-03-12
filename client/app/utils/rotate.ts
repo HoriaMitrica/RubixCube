@@ -11,7 +11,6 @@ export const rotateGroup = (
   setCubies: (cubies: Cubie[]) => void,
   setIsAnimating?: (isAnimating: boolean) => void
 ) => {
-  console.log(axis, cubies);
   
   const centerCubiesInGroup = groupIndices.filter(index => CENTER_INDEXES.includes(index));
   const isSliceMove = centerCubiesInGroup.length > 1;
@@ -127,7 +126,6 @@ export const rotateGroup = (
       });
       
       setCubies([...finalCubies]);
-      console.log(finalCubies);
       
       if (setIsAnimating) {
         setIsAnimating(false);

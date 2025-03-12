@@ -4,10 +4,10 @@ import { useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import { RubikCubeProps } from '@/models/cube'
-
-export const RubiksCube3x3: React.FC<RubikCubeProps> = ({ 
-  cubies, 
-  onRotationStart, 
+import { BACK_LAYER_INDEXES, BOTTOM_LAYER_INDEXES, EQUATOR_LAYER_INDEXES, FRONT_LAYER_INDEXES, LEFT_LAYER_INDEXES, MIDDLE_LAYER_INDEXES, RIGHT_LAYER_INDEXES, SLICE_LAYER_INDEXES, TOP_LAYER_INDEXES, X_CLOCKWISE_ROTATION, X_COUNTERCLOCKWISE_ROTATION, Y_CLOCKWISE_ROTATION, Y_COUNTERCLOCKWISE_ROTATION, Z_CLOCKWISE_ROTATION, Z_COUNTERCLOCKWISE_ROTATION } from '@/constants/constants'
+export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
+  cubies,
+  onRotationStart,
   isAnimating,
   onCubiePointerDown,
   onCubiePointerUp
@@ -52,45 +52,57 @@ export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
       setDragStart(null);
       return;
     }
-
+  
     const endScreenPosition = new THREE.Vector2(
       (e.clientX / gl.domElement.clientWidth) * 2 - 1,
       -(e.clientY / gl.domElement.clientHeight) * 2 + 1
     );
-
+  
     const screenDragVector = {
       start: clickInfo.current.screenPosition,
       end: endScreenPosition
     };
-
+  
     const dragDistance = new THREE.Vector2()
       .subVectors(endScreenPosition, clickInfo.current.screenPosition)
       .length();
-
-    if (dragDistance > 0.05) {
-      const move = determineRotation(
-        clickInfo.current.position,
-        clickInfo.current.normal,
-        screenDragVector,
-        camera
-      );
-
-      console.log(`Move: ${move}`);
-
-      if (onRotationStart && move) {
-        const rotationParams = convertMoveToRotationParams(move);
-        if (rotationParams) {
-          const { groupIndices, axis, angle } = rotationParams;
-          onRotationStart(groupIndices, axis, angle);
+  
+    console.log(`Drag distance: ${dragDistance.toFixed(3)}`);
+  
+    // Slightly increased threshold for more intentional drags
+    if (dragDistance > 0.08) {
+      try {
+        const move = determineRotation(
+          clickInfo.current.position,
+          clickInfo.current.normal,
+          screenDragVector,
+          camera
+        );
+  
+        console.log(`Move: ${move}`);
+  
+        if (onRotationStart && move) {
+          const rotationParams = convertMoveToRotationParams(move);
+          if (rotationParams) {
+            const { groupIndices, axis, angle } = rotationParams;
+            console.log(`Rotating ${groupIndices.length} cubies around axis (${axis.x}, ${axis.y}, ${axis.z})`);
+            onRotationStart(groupIndices, axis, angle);
+          } else {
+            console.warn("Failed to convert move to rotation parameters");
+          }
         }
+      } catch (error) {
+        console.error("Error determining rotation:", error);
       }
+    } else {
+      console.log("Drag too small, ignoring");
     }
-
+  
     setDragStart(null);
     clickInfo.current = null;
   };
 
-  // Determine the rotation based on geometry
+  // Improved rotation detection for Rubik's cube
   const determineRotation = (
     clickPosition: THREE.Vector3,
     faceNormal: THREE.Vector3,
@@ -110,18 +122,40 @@ export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
     // Calculate the 3D drag vector on the face plane
     const dragVector3D = new THREE.Vector3().subVectors(dragEndWorld, dragStartWorld);
 
-    // Step 3: Calculate the rotation axis using cross product
-    // The cross product of the face normal and drag vector gives us the rotation axis
-    const rotationAxis = new THREE.Vector3().crossVectors(faceNormal, dragVector3D).normalize();
+    // Step 3: Determine drag direction in camera space for more intuitive controls
+    const cameraUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    const cameraRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
 
-    // Step 4: Determine which principal axis the rotation axis is most aligned with
+    const verticalDrag = dragVector3D.dot(cameraUp);
+    const horizontalDrag = dragVector3D.dot(cameraRight);
+
+    const isDraggingVertically = Math.abs(verticalDrag) > Math.abs(horizontalDrag);
+    const dragSign = isDraggingVertically ? Math.sign(verticalDrag) : Math.sign(horizontalDrag);
+
+    // Step 4: Determine if we're looking at the face from the front or back
+    const cameraDirection = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const lookingFromFront = faceNormal.dot(cameraDirection) < 0;
+
+    // Step 5: Normalize vectors before cross product for more consistent results
+    const normalizedNormal = faceNormal.clone().normalize();
+    const normalizedDrag = dragVector3D.clone().normalize();
+
+    // Step 6: Calculate the rotation axis using cross product
+    const rotationAxis = new THREE.Vector3().crossVectors(normalizedNormal, normalizedDrag);
+
+    // Step 7: Determine which principal axis the rotation axis is most aligned with
     const absX = Math.abs(rotationAxis.x);
     const absY = Math.abs(rotationAxis.y);
     const absZ = Math.abs(rotationAxis.z);
 
     let principalAxis: string;
     let direction: number;
-    console.log(absX, absY, absZ);
+
+    // Log these values for debugging
+    console.log("Rotation components:", absX.toFixed(2), absY.toFixed(2), absZ.toFixed(2));
+    console.log("Drag:", isDraggingVertically ? "vertical" : "horizontal", dragSign);
+    console.log("Looking from:", lookingFromFront ? "front" : "back");
+
     if (absX > absY && absX > absZ) {
       principalAxis = 'x';
       direction = Math.sign(rotationAxis.x);
@@ -132,37 +166,82 @@ export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
       principalAxis = 'z';
       direction = Math.sign(rotationAxis.z);
     }
-    console.log(direction);
-    // Step 5: Determine which layer to rotate based on the click position
+
+    // Step 8: Apply view-dependent adjustments to direction
+    // These adjustments ensure consistent behavior when viewing from different angles
+
+    // Determine which face we're on (based on normalized normal)
+    const absNormalX = Math.abs(normalizedNormal.x);
+    const absNormalY = Math.abs(normalizedNormal.y);
+    const absNormalZ = Math.abs(normalizedNormal.z);
+
+    let faceName = '';
+
+    if (absNormalX > absNormalY && absNormalX > absNormalZ) {
+      faceName = normalizedNormal.x > 0 ? 'right' : 'left';
+    } else if (absNormalY > absNormalX && absNormalY > absNormalZ) {
+      faceName = normalizedNormal.y > 0 ? 'top' : 'bottom';
+    } else {
+      faceName = normalizedNormal.z > 0 ? 'front' : 'back';
+    }
+
+    console.log("Face:", faceName);
+
+    // Apply face-specific direction adjustments
+    // These are tuned carefully to ensure consistent behavior
+    if (faceName === 'front' || faceName === 'back') {
+      if (principalAxis === 'x') {
+        if (!lookingFromFront) direction = -direction;
+      } else if (principalAxis === 'y') {
+        if (faceName === 'back') direction = -direction;
+      }
+    } else if (faceName === 'left' || faceName === 'right') {
+      if (principalAxis === 'y') {
+        if (!lookingFromFront) direction = -direction;
+      } else if (principalAxis === 'z') {
+        if (faceName === 'right') direction = -direction;
+      }
+    } else if (faceName === 'top' || faceName === 'bottom') {
+      if (principalAxis === 'x') {
+        if (faceName === 'bottom') direction = -direction;
+      } else if (principalAxis === 'z') {
+        if (!lookingFromFront) direction = -direction;
+      }
+    }
+
+    // Step 9: Determine which layer to rotate
     const layerIndex = determineLayerFromPosition(clickPosition, principalAxis);
 
-    // Step 6: Map to standard Rubik's cube notation
-    return mapToNotation(principalAxis, layerIndex, direction);
+    // Step 10: Map to standard Rubik's cube notation
+    const notation = mapToNotation(principalAxis, layerIndex, direction);
+
+    console.log(`Final: axis=${principalAxis}, layer=${layerIndex}, dir=${direction} → ${notation}`);
+
+    return notation;
   };
 
-  // Helper function to determine which layer the click position belongs to
+  // Enhanced layer detection with better thresholds
   const determineLayerFromPosition = (position: THREE.Vector3, axis: string): number => {
     // Get the component value for the specified axis
     const value = position[axis as keyof THREE.Vector3] as number;
 
-    // Determine layer (0, 1, or 2) based on position
-    // Assuming the cube is roughly centered at origin with dimensions of approx ±1.5
-    if (value < -0.3) return 0;      // First layer
-    else if (value > 0.3) return 2;  // Last layer
-    else return 1;                   // Middle layer
+    // Use slightly adjusted thresholds for more reliable detection
+    if (value < -0.25) return 0;      // First layer
+    else if (value > 0.25) return 2;  // Last layer
+    else return 1;                    // Middle layer
   };
 
-  // Map the geometric determination to standard Rubik's cube notation
+  // Fixed notation map (correcting the D' typo)
   const mapToNotation = (axis: string, layer: number, direction: number): string => {
     // Conversion table from axis, layer and direction to notation
     const notationMap: Record<string, Record<number, Record<string, string>>> = {
       'x': {
-        0: { '1': 'L', '-1': "L'" },    // Left face
-        1: { '1': 'M', '-1': "M'" },    // Middle slice
-        2: { '1': "R'", '-1': 'R' }     // Right face (note: inverted direction)
+        0: { '1': "L'", '-1': "L" },    // Left face
+        1: { '1': "M'", '-1': "M" },    // Middle slice
+        2: { '1': "R", '-1': "R'" }     // Right face (note: inverted direction)
       },
       'y': {
-        0: { '1': 'D', '-1': "'D'" },    // Down face
+        0: { '1': 'D', '-1': "D'" },    // Down face (fixed typo)
         1: { '1': 'E', '-1': "E'" },    // Equator slice
         2: { '1': "U'", '-1': 'U' }     // Up face
       },
@@ -176,6 +255,7 @@ export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
     try {
       return notationMap[axis][layer][direction.toString()];
     } catch (e) {
+      console.error("Invalid notation mapping:", axis, layer, direction);
       return "";
     }
   };
@@ -196,15 +276,66 @@ export const RubiksCube3x3: React.FC<RubikCubeProps> = ({
   };
 
   const convertMoveToRotationParams = (move: string) => {
-
     const isClockwise = !move.includes("'");
     const baseFace = move.charAt(0);
 
+    let axis: THREE.Vector3;
+    let groupIndices: number[] = [];
+
     switch (baseFace) {
+      case 'F':
+        axis = isClockwise ? Z_CLOCKWISE_ROTATION : Z_COUNTERCLOCKWISE_ROTATION;
+        groupIndices = FRONT_LAYER_INDEXES;
+        break;
+
+      case 'B':
+        axis = isClockwise ? Z_COUNTERCLOCKWISE_ROTATION : Z_CLOCKWISE_ROTATION;
+        groupIndices = BACK_LAYER_INDEXES;
+        break;
+
+      case 'U':
+        axis = isClockwise ? Y_CLOCKWISE_ROTATION : Y_COUNTERCLOCKWISE_ROTATION;
+        groupIndices = TOP_LAYER_INDEXES;
+        break;
+
+      case 'D':
+        axis = isClockwise ? Y_COUNTERCLOCKWISE_ROTATION : Y_CLOCKWISE_ROTATION;
+        groupIndices = BOTTOM_LAYER_INDEXES;
+        break;
+
+      case 'L':
+        axis = isClockwise ? X_CLOCKWISE_ROTATION : X_COUNTERCLOCKWISE_ROTATION;
+        groupIndices = LEFT_LAYER_INDEXES;
+        break;
+
+      case 'R':
+        axis = isClockwise ? X_COUNTERCLOCKWISE_ROTATION : X_CLOCKWISE_ROTATION;
+        groupIndices = RIGHT_LAYER_INDEXES;
+        break;
+
+      case 'M':
+        axis = isClockwise ? X_CLOCKWISE_ROTATION : X_COUNTERCLOCKWISE_ROTATION;
+        groupIndices = MIDDLE_LAYER_INDEXES;
+        break;
+
+      case 'E':
+        axis = isClockwise ? Y_COUNTERCLOCKWISE_ROTATION : Y_CLOCKWISE_ROTATION;
+        groupIndices = EQUATOR_LAYER_INDEXES;
+        break;
+
+      case 'S':
+        axis = isClockwise ? Z_CLOCKWISE_ROTATION : Z_COUNTERCLOCKWISE_ROTATION;
+        groupIndices = SLICE_LAYER_INDEXES;
+        break;
 
       default:
+        console.error("Unknown move notation:", move);
         return null;
     }
+
+    const angle = Math.PI / 2;
+    console.log(`Rotating indices ${groupIndices.join(', ')} around axis ${JSON.stringify(axis)}`);
+    return { groupIndices, axis, angle };
   };
 
   return (

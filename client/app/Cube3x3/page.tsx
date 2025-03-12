@@ -76,7 +76,7 @@ const Cube = () => {
             />
         </Canvas>
 
-            <div className="controls-container">
+            {/* <div className="controls-container">
                 <div className="action-buttons">
                     <button
                         disabled={isAnimating}
@@ -140,7 +140,7 @@ const Cube = () => {
                     <button disabled={isAnimating} className="button" onClick={() =>
                         handleRotation(SLICE_LAYER_INDEXES, Z_COUNTERCLOCKWISE_ROTATION, ROTATION_ANGLE)}>S&apos;</button>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };
